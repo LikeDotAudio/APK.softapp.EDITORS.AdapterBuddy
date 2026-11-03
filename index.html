@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adapter & Media Balun Buddy — APK.audio</title>
+  <style>
+    body { font-family: -apple-system, sans-serif; background: #0f1218; color: #e2e8f0; margin: 0; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #283348; padding-bottom: 12px; margin-bottom: 20px; }
+    .card { background: #171d27; border: 1px solid #283348; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #222c3d; font-family: monospace; }
+    button { background: #0284c7; color: #fff; border: 1px solid #38bdf8; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:20px;">🔌</span>
+      <h2>Adapter & Media Balun Buddy</h2>
+    </div>
+    <button id="btn-export">Export Adapter JSON</button>
+  </header>
+
+  <div class="card">
+    <div style="font-size:16px; font-weight:700; color:#38bdf8;">HDMI to 12G-SDI Micro Converter</div>
+    <div style="font-size:13px; color:#94a3b8; margin-top:4px;">Signal Conversion: HDMI 2.0 (Type A) &rarr; 12G-SDI (BNC 75Ω)</div>
+  </div>
+
+  <div class="card">
+    <h3 style="font-size:14px; text-transform:uppercase; color:#94a3b8;">Pinout & Signal Translation</h3>
+    <table>
+      <thead>
+        <tr><th>Source Input Pin</th><th>Destination Output Pin</th><th>Status</th></tr>
+      </thead>
+      <tbody id="pin-rows"></tbody>
+    </table>
+  </div>
+
+  <script type="module">
+    import { AdapterModel } from './js/adapterApp.js';
+    const model = new AdapterModel();
+
+    const tbody = document.getElementById('pin-rows');
+    model.pinMap.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${p.fromPin}</td><td>${p.toPin}</td><td style="color:${p.status === 'Mapped' ? '#34d399' : '#64748b'}">${p.status}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(model, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${model.name}.json`;
+      a.click();
+    });
+  </script>
+</body>
+</html>

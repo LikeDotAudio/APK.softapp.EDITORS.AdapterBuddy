@@ -1,0 +1,8 @@
+{
+  "name": "Adapter & Media Balun Buddy",
+  "icon": "🔌",
+  "group": "Design",
+  "subGroup": "Hardware & Devices",
+  "description": "Adapter & Media Balun Buddy: configure inline signal adapters, audio baluns, HDMI-to-SDI converters, XLR barrel turnarounds, gender changers, and pinout translation matrices.",
+  "app": "APK:Softapps/EDITORS/EDITORS.AdapterBuddy/index.html"
+}
