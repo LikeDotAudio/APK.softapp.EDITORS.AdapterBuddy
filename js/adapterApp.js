@@ -213,19 +213,19 @@ export class AdapterApp {
 
       pinsSvg += `
         <!-- Input Terminal -->
-        <circle cx="${inX}" cy="${y}" r="5" fill="#121A2F" stroke="${strokeColor}" stroke-width="2"/>
-        <text x="${inX - 12}" y="${y + 4}" fill="#F0F4F8" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="end">${pin.fromPin}</text>
+        <circle cx="${inX}" cy="${y}" r="5" fill="#18181b" stroke="${strokeColor}" stroke-width="2"/>
+        <text x="${inX - 12}" y="${y + 4}" fill="#f4f4f5" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="end">${pin.fromPin}</text>
 
         <!-- Route Path -->
         <path d="M ${inX + 5} ${y} C ${midX - 40} ${y}, ${midX + 40} ${y}, ${outX - 5} ${y}" fill="none" stroke="${strokeColor}" stroke-width="2" ${strokeDash}/>
 
         <!-- Signal Indicator badge -->
-        <rect x="${midX - 35}" y="${y - 9}" width="70" height="18" rx="3" fill="#080C16" stroke="${strokeColor}" stroke-width="1"/>
-        <text x="${midX}" y="${y + 4}" fill="#8B9BB4" font-size="9" font-family="sans-serif" text-anchor="middle">${pin.signal || 'Signal'}</text>
+        <rect x="${midX - 35}" y="${y - 9}" width="70" height="18" rx="3" fill="#121212" stroke="${strokeColor}" stroke-width="1"/>
+        <text x="${midX}" y="${y + 4}" fill="#888888" font-size="9" font-family="sans-serif" text-anchor="middle">${pin.signal || 'Signal'}</text>
 
         <!-- Output Terminal -->
-        <circle cx="${outX}" cy="${y}" r="5" fill="#121A2F" stroke="${strokeColor}" stroke-width="2"/>
-        <text x="${outX + 12}" y="${y + 4}" fill="#F0F4F8" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="start">${pin.toPin}</text>
+        <circle cx="${outX}" cy="${y}" r="5" fill="#18181b" stroke="${strokeColor}" stroke-width="2"/>
+        <text x="${outX + 12}" y="${y + 4}" fill="#f4f4f5" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="start">${pin.toPin}</text>
       `;
     });
 
@@ -233,9 +233,9 @@ export class AdapterApp {
       <svg viewBox="0 0 ${width} ${height}" width="100%" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="chassisGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stop-color="#121A2F"/>
-            <stop offset="50%" stop-color="#1E2A45"/>
-            <stop offset="100%" stop-color="#121A2F"/>
+            <stop offset="0%" stop-color="#18181b"/>
+            <stop offset="50%" stop-color="#2c2c2c"/>
+            <stop offset="100%" stop-color="#18181b"/>
           </linearGradient>
         </defs>
 
@@ -243,17 +243,17 @@ export class AdapterApp {
         <rect x="70" y="15" width="500" height="${height - 30}" rx="10" fill="url(#chassisGrad)" stroke="#2B3C5D" stroke-width="2"/>
 
         <!-- Header Bar -->
-        <rect x="70" y="15" width="500" height="42" rx="10" fill="#0E1424" stroke="#2B3C5D" stroke-width="1"/>
+        <rect x="70" y="15" width="500" height="42" rx="10" fill="#0f0f11" stroke="#2B3C5D" stroke-width="1"/>
         <text x="90" y="42" fill="#F4902C" font-size="14" font-weight="bold" font-family="JetBrains Mono, monospace">${this.model.name}</text>
-        <text x="320" y="42" fill="#8B9BB4" font-size="11" font-family="sans-serif" text-anchor="middle">${this.model.category} • ${this.model.passiveOrActive}</text>
+        <text x="320" y="42" fill="#888888" font-size="11" font-family="sans-serif" text-anchor="middle">${this.model.category} • ${this.model.passiveOrActive}</text>
         <text x="550" y="42" fill="#4A9EFF" font-size="11" font-family="JetBrains Mono, monospace" text-anchor="end">${this.model.partNumber}</text>
 
         <!-- Left Connector Frame -->
-        <rect x="80" y="65" width="110" height="${height - 90}" rx="6" fill="#080C16" stroke="#2B3C5D" stroke-width="1"/>
+        <rect x="80" y="65" width="110" height="${height - 90}" rx="6" fill="#121212" stroke="#2B3C5D" stroke-width="1"/>
         <text x="135" y="82" fill="#4A9EFF" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">${this.model.inFormat}</text>
 
         <!-- Right Connector Frame -->
-        <rect x="450" y="65" width="110" height="${height - 90}" rx="6" fill="#080C16" stroke="#2B3C5D" stroke-width="1"/>
+        <rect x="450" y="65" width="110" height="${height - 90}" rx="6" fill="#121212" stroke="#2B3C5D" stroke-width="1"/>
         <text x="505" y="82" fill="#4A9EFF" font-size="11" font-weight="bold" font-family="sans-serif" text-anchor="middle">${this.model.outFormat}</text>
 
         <!-- Pins and routing -->
