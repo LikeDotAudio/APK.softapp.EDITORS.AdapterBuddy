@@ -39,6 +39,25 @@ export class AdapterApp {
       empty: 'No pin mappings yet. Add one above.',
     });
 
+    S.describe({
+      name: 'Adapter Buddy',
+      does: 'Draws one adapter (connector A to connector B) and its pin-by-pin translation map, as an adapter block for the CAD.',
+      inputs: [
+        { name: 'Adapter block', from: 'the CAD (when opened from a drawing), or a .json file via Open Block', kind: 'file' },
+        { name: 'Interface Map', from: 'the bus: retained Gui/Interfaces/Map/Interfaces panel (format suggestions only)', kind: 'bus' },
+      ],
+      outputs: [
+        { name: 'Adapter block', to: 'the CAD on Save & Return and live on every edit; outside the CAD Save downloads adapter_<name>.json', kind: 'file' },
+      ],
+      controls: [
+        { name: 'Open Block', how: 'pick an adapter block .json to edit' },
+        { name: 'Save & Return', how: 'send the block to the CAD (or download it standalone)' },
+        { name: 'Name / Part / Category / Active / In / Out / Attenuation', how: 'type or pick; the drawing updates as you type' },
+        { name: '+ Add Pin Mapping', how: 'adds a pin row; edit From / To / Signal / Status in the table, delete with its row button' },
+        { name: 'Close (x)', how: 'closes the editor inside the CAD' },
+      ],
+      problems: ['bad_json', 'bad_input', 'file_unreadable', 'not_in_cad', 'bus_missing'],
+    });
     this.host = connectAdapterHost(S, this.model, { onLoaded: () => this.render() });
     S.inheritTheme();
     this.initControls();
@@ -72,7 +91,7 @@ export class AdapterApp {
       this.host.save(this.model.toBlock(), saveMeta(this.model));
     });
 
-    document.getElementById('btn-open')?.addEventListener('click', () => {
+    const open = () => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = '.json';
@@ -80,19 +99,28 @@ export class AdapterApp {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
+        reader.onerror = () => this.S.showProblem('file_unreadable', {
+          subject: file.name, detail: reader.error && reader.error.message, onRetry: open,
+        });
         reader.onload = (evt) => {
           try {
             this.model.fromBlock(JSON.parse(evt.target.result));
             this.render();
             this.changed();
           } catch (err) {
-            alert('Invalid block file: ' + err.message);
+            this.S.showProblem(err instanceof SyntaxError ? 'bad_json' : 'bad_input', {
+              subject: file.name,
+              detail: err.message,
+              fix: ['Open an adapter block .json saved by Adapter Buddy (Save & Return outside the CAD downloads one).'],
+              onRetry: open,
+            });
           }
         };
         reader.readAsText(file);
       };
       input.click();
-    });
+    };
+    document.getElementById('btn-open')?.addEventListener('click', open);
 
     document.getElementById('btn-close')?.addEventListener('click', () => this.host.close());
 
