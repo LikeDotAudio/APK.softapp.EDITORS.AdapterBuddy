@@ -1,6 +1,6 @@
 {
   "name": "adapter-buddy-editor",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Adapter & Media Balun Buddy on APK.audio",
   "type": "module",
   "scripts": {
