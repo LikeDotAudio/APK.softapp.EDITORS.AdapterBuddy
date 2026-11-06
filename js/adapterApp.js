@@ -2,7 +2,7 @@
 // MIT Licence. Free, for everyone, for ever. Full text in LICENSE at the root.
 
 import { AdapterModel } from './adapterModel.js';
-import { connectAdapterHost, saveMeta, interfaceFamilies } from './adapterHost.js';
+import { connectAdapterHost, saveMeta, interfaceFamilies, saveAdapter, openAdapter } from './adapterHost.js';
 
 export { AdapterModel };
 
@@ -43,20 +43,20 @@ export class AdapterApp {
       name: 'Adapter Buddy',
       does: 'Draws one adapter (connector A to connector B) and its pin-by-pin translation map, as an adapter block for the CAD.',
       inputs: [
-        { name: 'Adapter block', from: 'the CAD (when opened from a drawing), or a .json file via Open Block', kind: 'file' },
+        { name: 'Adapter block', from: 'the CAD (when opened from a drawing), or Open Model: an adapter .ifc (this editor\'s twin or a BIM adapter part) or block .json', kind: 'file' },
         { name: 'Interface Map', from: 'the bus: retained Gui/Interfaces/Map/Interfaces panel (format suggestions only)', kind: 'bus' },
       ],
       outputs: [
-        { name: 'Adapter block', to: 'the CAD on Save & Return and live on every edit; outside the CAD Save downloads adapter_<name>.json', kind: 'file' },
+        { name: 'Adapter block', to: 'the CAD on Save & Return and live on every edit; outside the CAD Save Model writes adapter_<name>.json AND adapter_<name>.ifc (IFC4X3_ADD2: IfcCableFittingType TRANSITION or IfcCommunicationsApplianceType TRANSITIONCOMPONENT, two ports)', kind: 'file' },
       ],
       controls: [
-        { name: 'Open Block', how: 'pick an adapter block .json to edit' },
-        { name: 'Save & Return', how: 'send the block to the CAD (or download it standalone)' },
+        { name: 'Open Model', how: 'pick an adapter .ifc or block .json to edit' },
+        { name: 'Save & Return', how: 'send the block to the CAD; standalone, Save Model: the .json and its .ifc twin' },
         { name: 'Name / Part / Category / Active / In / Out / Attenuation', how: 'type or pick; the drawing updates as you type' },
         { name: '+ Add Pin Mapping', how: 'adds a pin row; edit From / To / Signal / Status in the table, delete with its row button' },
         { name: 'Close (x)', how: 'closes the editor inside the CAD' },
       ],
-      problems: ['bad_json', 'bad_input', 'file_unreadable', 'not_in_cad', 'bus_missing'],
+      problems: ['bad_json', 'bad_input', 'file_unreadable', 'not_in_cad', 'bus_missing', 'save_failed'],
     });
     this.host = connectAdapterHost(S, this.model, { onLoaded: () => this.render() });
     S.inheritTheme();
@@ -66,6 +66,28 @@ export class AdapterApp {
   }
 
   changed() { this.host.changed(this.model.toBlock(), saveMeta(this.model)); }
+
+  /** Save & Return in the CAD; standalone Save Model: the block .json and its .ifc twin, both or neither. */
+  async save() {
+    const r = await saveAdapter(this.S, this.host, this.model);
+    if (!r.ok && !r.cancelled) this.S.showProblem(r.problem || 'save_failed', { onRetry: () => this.save() });
+    return r;
+  }
+
+  /** Open Model: an adapter .ifc or block .json. */
+  async open() {
+    const r = await openAdapter(this.S, this.model);
+    if (!r.ok) {
+      if (!r.cancelled) this.S.showProblem(r.problem, {
+        fix: ['Open an adapter .ifc or block .json saved by Adapter Buddy (Save outside the CAD writes both).'],
+        onRetry: () => this.open(),
+      });
+      return r;
+    }
+    this.render();
+    this.changed();
+    return r;
+  }
 
   /* Format suggestions come from the contract's Interfaces table (the Interface Map), never a list of our own. */
   async readInterfaces() {
@@ -87,39 +109,8 @@ export class AdapterApp {
   }
 
   initControls() {
-    document.getElementById('btn-save')?.addEventListener('click', () => {
-      this.host.save(this.model.toBlock(), saveMeta(this.model));
-    });
-
-    const open = () => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = '.json';
-      input.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onerror = () => this.S.showProblem('file_unreadable', {
-          subject: file.name, detail: reader.error && reader.error.message, onRetry: open,
-        });
-        reader.onload = (evt) => {
-          try {
-            this.model.fromBlock(JSON.parse(evt.target.result));
-            this.render();
-            this.changed();
-          } catch (err) {
-            this.S.showProblem(err instanceof SyntaxError ? 'bad_json' : 'bad_input', {
-              subject: file.name,
-              detail: err.message,
-              fix: ['Open an adapter block .json saved by Adapter Buddy (Save & Return outside the CAD downloads one).'],
-              onRetry: open,
-            });
-          }
-        };
-        reader.readAsText(file);
-      };
-      input.click();
-    };
+    document.getElementById('btn-save')?.addEventListener('click', () => this.save());
+    const open = () => this.open();
     document.getElementById('btn-open')?.addEventListener('click', open);
 
     document.getElementById('btn-close')?.addEventListener('click', () => this.host.close());

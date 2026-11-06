@@ -2,7 +2,7 @@
 // MIT Licence. Free, for everyone, for ever. Full text in LICENSE at the root.
 
 export class AdapterModel {
-  constructor(name = 'HDMI-SDI-BALUN', inFormat = 'HDMI 2.0', outFormat = '12G-SDI') {
+  constructor(name = 'HDMI-SDI-BALUN', inFormat = 'HDMI 2.0', outFormat = '12G-SDI BNC') {
     this.name = name;
     this.partNumber = 'ADP-H2S-12G';
     this.category = 'Media Converter';
@@ -10,6 +10,7 @@ export class AdapterModel {
     this.inFormat = inFormat;
     this.outFormat = outFormat;
     this.attenuationDb = 0;
+    this.bimId = ''; // the adapter's BIM part (<maker>/<model>), when the block names one
     this.pinMap = [
       { fromPin: 'TMDS Data0+', toPin: 'SDI Channel 1', status: 'Mapped', signal: 'Video' },
       { fromPin: 'TMDS Data1+', toPin: 'SDI Channel 2', status: 'Mapped', signal: 'Video' },
@@ -58,7 +59,8 @@ export class AdapterModel {
       inFormat: this.inFormat,
       outFormat: this.outFormat,
       attenuationDb: this.attenuationDb,
-      pinMap: JSON.parse(JSON.stringify(this.pinMap))
+      pinMap: JSON.parse(JSON.stringify(this.pinMap)),
+      ...(this.bimId ? { bimId: this.bimId } : {})
     };
   }
 
@@ -70,6 +72,7 @@ export class AdapterModel {
     if (block.inFormat) this.inFormat = block.inFormat;
     if (block.outFormat) this.outFormat = block.outFormat;
     if (block.attenuationDb !== undefined) this.attenuationDb = block.attenuationDb;
+    if (block.bimId !== undefined) this.bimId = String(block.bimId || '');
     if (Array.isArray(block.pinMap)) {
       this.pinMap = JSON.parse(JSON.stringify(block.pinMap));
     }
